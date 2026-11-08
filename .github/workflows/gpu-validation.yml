@@ -26,18 +26,8 @@ jobs:
           persist-credentials: false
       - name: Verify source and GPU
         run: |
-          $expected = @{
-            'fastvideo/attention/backends/flash_attn.py' = '2401a84751c5e93cc4a828db8ccdb31237c2929e70677e19ca716dfb5ef44ff8'
-            'fastvideo/attention/backends/abstract.py' = '2a738821b0505b658f7b722ab217fe6ddd0d326329235b4bc390ae90317c880c'
-            'fastvideo/attention/backends/sdpa.py' = '48a8aaa8bf19592510156a9983f12fcc6e60bfb547fbab3134b17f4ec88330cb'
-            'fastvideo/tests/attention/test_flash_attn_no_pad_custom_op.py' = 'b65b517d1bbe9bfe53d5d1295b16ca96828a7b681b372765eb63208473bf9fae'
-            'baseline_flash_attn.py' = '56ba56b87ee2d0e1e31704cd46b3788bf63511fc67c54806d6251fa66c94b259'
-            'fastvideo_gpu_adapter_validation_20261108.py' = 'f17781aafaf87a2edb010fe5ed2f3fa82283e0a0c8c1f1a52f29e0d72a2b54ec'
-          }
-          foreach ($path in $expected.Keys) {
-            $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $path).Hash.ToLowerInvariant()
-            if ($actual -ne $expected[$path]) { throw "Unexpected SHA256 for $path" }
-          }
+          & 'C:\PR\kvpress-gpu-venv-20261107\Scripts\python.exe' -c "import hashlib,pathlib; pairs=[('fastvideo/attention/backends/flash_attn.py','2401a84751c5e93cc4a828db8ccdb31237c2929e70677e19ca716dfb5ef44ff8'),('fastvideo/attention/backends/abstract.py','2a738821b0505b658f7b722ab217fe6ddd0d326329235b4bc390ae90317c880c'),('fastvideo/attention/backends/sdpa.py','48a8aaa8bf19592510156a9983f12fcc6e60bfb547fbab3134b17f4ec88330cb'),('fastvideo/tests/attention/test_flash_attn_no_pad_custom_op.py','b65b517d1bbe9bfe53d5d1295b16ca96828a7b681b372765eb63208473bf9fae'),('baseline_flash_attn.py','56ba56b87ee2d0e1e31704cd46b3788bf63511fc67c54806d6251fa66c94b259'),('fastvideo_gpu_adapter_validation_20261108.py','f17781aafaf87a2edb010fe5ed2f3fa82283e0a0c8c1f1a52f29e0d72a2b54ec')]; assert all(hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()==s for p,s in pairs); print('All source hashes verified')"
+          if ($LASTEXITCODE -ne 0) { throw 'Source hash verification failed' }
           Write-Host 'FastVideo source commit: b03d2c63ef8414ee71839e88747546593d911c29'
           Write-Host 'Original upstream commit: ce970eb715215c79a169658d7aa6c8a96e64891e'
           nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader
