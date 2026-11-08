@@ -37,7 +37,7 @@ jobs:
       - name: Confirm the original backend fails
         run: |
           $env:PYTHONPATH = $env:GITHUB_WORKSPACE
-          $baseline = Join-Path $env:RUNNER_TEMP 'fastvideo-baseline'
+          $baseline = Join-Path $env:RUNNER_TEMP ("fastvideo-baseline-" + $env:GITHUB_RUN_ID)
           New-Item -ItemType Directory -Force -Path $baseline | Out-Null
           Copy-Item -LiteralPath (Join-Path $env:GITHUB_WORKSPACE 'fastvideo') -Destination $baseline -Recurse
           Copy-Item -LiteralPath 'baseline_flash_attn.py' -Destination (Join-Path $baseline 'fastvideo/attention/backends/flash_attn.py') -Force
@@ -47,6 +47,7 @@ jobs:
           $testExit = $LASTEXITCODE
           Write-Host $output
           if ($testExit -ne 1 -or $output -notmatch '4 failed, 2 passed') { throw 'Unexpected baseline result' }
+          exit 0
       - name: Run patched adapter on CUDA
         run: |
           $env:PYTHONPATH = $env:GITHUB_WORKSPACE
